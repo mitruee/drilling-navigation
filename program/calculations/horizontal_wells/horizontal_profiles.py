@@ -11,8 +11,8 @@ class HorizontalProfile(ABC):
     A: float # проектное смещение скважины на проектной глубине
     a: float # величина зенитного угла в начале горизонтального участка
     S_l: float # протяженность горизонтального участка по пласту
-    T1: float # предельные отклонения оси горизонтального участка в поперечном направлении
-    T2: float # <<<------>>>
+    T1: float # предельное смещение горизонтального участка в направлении вверх
+    T2: float # предельное смещение горизонтального участка в направлении вниз
     R1: float # радиус 1-ого участка
 
     def __init__(self, *args):
@@ -41,18 +41,37 @@ class HorizontalProfile(ABC):
     def a_h(self):
         """Абстрактное свойство для расчета величины зенитного угла в конце горизонтального участка"""
         raise NotImplementedError
+    
+    @property
+    @abstractmethod
+    def L_h(self):
+        """Абстрактное свойство для расчета длины горизонтального участка"""
+        raise NotImplementedError
 
 
-class Tagential(HorizontalProfile):
+class Tangential(HorizontalProfile):
     """Класс, описывающий тангенциальный профиль"""
 
     @property
     def H_h(self):
-        return self.S_l * cos(self.a) + self.H
+        return self.S_l * cos(radians(self.a)) + self.H
 
     @property
     def A_h(self):
-        return self.S_l * sin(self.a) + self.H
+        return self.S_l * sin(radians(self.a)) + self.A
+    
+    @property
+    def L_h(self):
+        return None
+    
+    @property
+    def R_h(self):
+        return None
+
+    def a_h(self):
+        return None
+    
+
 
 
 class Descending(HorizontalProfile):
@@ -60,19 +79,23 @@ class Descending(HorizontalProfile):
 
     @property
     def R_h(self):
-        return (self.S_l**2 + self.T2**2) / 2 * self.T2
+        return (self.S_l**2 + self.T2**2) / (2 * self.T2)
 
     @property
     def H_h(self):
-        return self.S_l * cos(self.a) - self.T2 * sin(self.a) + self.H
+        return self.S_l * cos(radians(self.a)) + self.T2 * sin(radians(self.a)) + self.H
 
     @property
     def A_h(self):
-        return self.S_l * sin(self.a) - self.T2 * cos(self.a) + self.A
+        return self.S_l * sin(radians(self.a)) - self.T2 * cos(radians(self.a)) + self.A
 
     @property
     def a_h(self):
-        return self.a - asin(self.S_l / self.R_h)
+        return self.a - degrees(asin(self.S_l / self.R_h))
+    
+    @property
+    def L_h(self):
+        return -pi / 180 * (self.a_h - self.a) * self.R_h
 
 
 class Ascending(HorizontalProfile):
@@ -80,19 +103,23 @@ class Ascending(HorizontalProfile):
 
     @property
     def R_h(self):
-        return (self.S_l**2 + self.T1**2) / 2 * self.T1
+        return ((self.S_l)**2 + (self.T1)**2) / (2 * self.T1)
 
     @property
     def H_h(self):
-        return self.S_l * cos(self.a) + self.T1 * sin(self.a) + self.H
+        return self.S_l * cos(radians(self.a)) - self.T1 * sin(radians(self.a)) + self.H
 
     @property
     def A_h(self):
-        return self.S_l * sin(self.a) + self.T1 * cos(self.a) + self.A
+        return self.S_l * sin(radians(self.a)) + self.T1 * cos(radians(self.a)) + self.A
 
     @property
     def a_h(self):
-        return self.a + asin(self.S_l / self.R_h)
+        return self.a + degrees(asin(self.S_l / self.R_h))
+    
+    @property
+    def L_h(self):
+        return pi / 180 * (self.a_h - self.a) * self.R_h
 
 
 class Undulant(HorizontalProfile):
@@ -116,3 +143,8 @@ class Undulant(HorizontalProfile):
     @property
     def a_h(self):
         return self.a - asin(sqrt(2 * self.R_h * (self.T1 + self.T2) - (self.T1 - self.T2) ** 2) / self.R_h)
+    
+
+    
+well = Tangential(1200, 200, 80, 500)
+print(well.H_h, well.A_h)
