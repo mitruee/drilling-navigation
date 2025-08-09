@@ -10,7 +10,7 @@ class DirectionalProfile(ABC):
     H: float # проектная глубина направляющей части профиля
     A: float # проектное смещение скважины на проектной глубине
     a: float # величина зенитного угла на проектной глубине (угол вхождения в пласт)
-    a1: float # величина зенитного угла в конце 1-ого участка профиля
+    a1: float # начальный зенитный угол
     R1: float # величина радиуса 1-ого участка
     R3: float # величина радиуса 3-ого участка
     a3: float # величина зенитного угла в конце 3-ого участка профиля
@@ -39,13 +39,49 @@ class DirectionalProfile(ABC):
 
     @property
     @abstractmethod
+    def depths(self):
+        """Абстрактное свойство для расчёта глубин по участкам"""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def lengths_of_the_bores(self):
+        """Абстрактное свойство для расчёта длин стволов по участкам"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def lengths_of_the_intervals(self):
+        """Абстрактное свойство для расчёта длин участков"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def dislocations(self):
+        """Абстрактное свойства для расчёта смещения по участкам"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def angles(self):
+        """Абстрактное свойство для расчёта зенитных углов по участкам"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
     def intensities(self):
-        """Абстрактное свойство для расчёта длины участка стабилизации"""
+        """Абстрактное свойство для расчёта интенсивности искривления участков"""
         raise NotImplementedError
 
 
 class TwoInterval(DirectionalProfile):
-    """Класс, описывающий двухинтервальную направляющую часть"""
+    """
+    Класс, описывающий двухинтервальную направляющую часть.
+    Параметры, необходимые для расчёта свойств объекта:
+    :параметр H: float, H > 0, проектная глубина направляющей части профиля;
+    :параметр A: float, A >= 0, проектное смещение скважины на проектной глубине;
+    :параметр a: float, 0 <= a <= 90, угол вхождения в пласт (градусы);
+    """
 
     @property
     def R(self):
@@ -60,7 +96,7 @@ class TwoInterval(DirectionalProfile):
         return super().L
 
     @property
-    def depth(self):
+    def depths(self):
         return [
             self.H_v,
             self.H
@@ -103,7 +139,14 @@ class TwoInterval(DirectionalProfile):
 
 
 class ThreeInterval(DirectionalProfile):
-    """Класс, описывающий трёхинтервальную направляющую часть"""
+    """
+    Класс, описывающий трёхинтервальную направляющую часть
+    Параметры, необходимые для расчёта свойств объекта:
+    :параметр H: float, H > 0, проектная глубина направляющей части профиля;
+    :параметр A: float, A >= 0, проектное смещение скважины на проектной глубине;
+    :параметр a: float, 0 <= a <= 90, угол вхождения в пласт (градусы);
+    :параметр a1: float, 0 <= a <= 90, начальный зенитный угол;
+    """
 
     @property
     def R(self):
@@ -118,7 +161,7 @@ class ThreeInterval(DirectionalProfile):
         return super().L
 
     @property
-    def depth(self):
+    def depths(self):
         return [
             self.H_v,
             self.H_v + self.R1 * sin(radians(self.a1)),
@@ -166,8 +209,17 @@ class ThreeInterval(DirectionalProfile):
         ]
 
 
-class TanFourInterval(DirectionalProfile):
-    """Класс, описывающий четырёхинтервальную тангенциальную направляющую часть с участком стабилизации"""
+class TangentialFourInterval(DirectionalProfile):
+    """
+    Класс, описывающий четырёхинтервальную направляющую часть с участком стабилизации.
+    Параметры, необходимые для расчёта свойств объекта:
+    :параметр H: float, H > 0, проектная глубина направляющей части профиля;
+    :параметр A: float, A > 0, проектное смещение скважины на проектной глубине;
+    :параметр a: float, 0 <= a <= 90, угол вхождения в пласт (градусы);
+    :параметр a1: float, 0 <= a <= 90, начальный зенитный угол;
+    :параметр R1: float, R1 > 0, величина радиуса 1-ого участка;
+    :параметр R3: float, R3 > 0, величина радиуса 3-ого участка;
+    """
 
     @property
     def R(self):
@@ -175,19 +227,40 @@ class TanFourInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * self.W - self.L * cos(radians(self.a1))
+        W = sin(self.a) - sin(self.a1)
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * W - self.L * cos(radians(self.a1))
 
     @property
     def L(self):
-        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * self.V) / sin(radians(self.a1))
+        V = cos(self.a1) - cos(self.a)
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V) / sin(radians(self.a1))
 
     @property
-    def W(self):
-        return sin(self.a) - sin(self.a1)
+    def depths(self):
+        return [
+            self.H_v,
+            self.H_v + self.R1 * sin(radians(self.a1)),
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)),
+            self.H
+        ]
 
     @property
-    def V(self):
-        return cos(self.a1) - cos(self.a)
+    def lengths_of_the_bores(self):
+        return [
+            self.H_v,
+            self.H_v + (pi * self.R1 * self.a1) / 180,
+            self.H_v + self.L + (pi * (self.R1 * self.a1)) / 180,
+            self.H_v + self.L + (pi * (self.R1 * self.a1 + self.R3 * (self.a - self.a1))) / 180
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.H_v,
+            self.lengths_of_the_bores[1] - self.lengths_of_the_bores[0],
+            self.lengths_of_the_bores[2] - self.lengths_of_the_bores[1],
+            self.lengths_of_the_bores[3] - self.lengths_of_the_bores[2]
+        ]
 
     @property
     def dislocations(self):
@@ -217,8 +290,19 @@ class TanFourInterval(DirectionalProfile):
         ]
 
 
-class TanFiveInterval(DirectionalProfile):
-    """Класс, описывающий пятиинтервальную направляющую часть с участком стабилизации"""
+class TangentialFiveInterval(DirectionalProfile):
+    """
+    Класс, описывающий пятиинтервальную направляющую часть с участком стабилизации.
+    Параметры, необходимые для расчёта свойств объекта:
+    :параметр H: float, H > 0, проектная глубина направляющей части профиля;
+    :параметр A: float, A > 0, проектное смещение скважины на проектной глубине;
+    :параметр a: float, 0 <= a <= 90, угол вхождения в пласт (градусы);
+    :параметр a1: float, 0 <= a1 <= 90, начальный зенитный угол;
+    :параметр R1: float, R1 > 0, величина радиуса 1-ого участка;
+    :параметр R3: float, R3 > 0, величина радиуса 3-ого участка;
+    :параметр а3: float, 0 <= a3 <= 90, зенитный угол в конце 3-ого участка;
+    :параметр R4: float, R4 > 0, величина радиуса;
+    """
 
     @property
     def R(self):
@@ -226,35 +310,22 @@ class TanFiveInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * self.W2  - self.L * cos(radians(self.a1)) - self.R4 * self.W3
+        W2, W3 = sin(radians(self.a3)) - sin(radians(self.a1)), sin(radians(self.a)) - sin(radians(self.a3))
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * W2  - self.L * cos(radians(self.a1)) - self.R4 * W3
 
     @property
     def L(self):
-        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * self.V2 - self.R4 * self.V3) / sin(radians(self.a1))
-
-    @property
-    def W2(self):
-        return sin(radians(self.a3)) - sin(radians(self.a1))
-
-    @property
-    def W3(self):
-        return sin(radians(self.a)) - sin(radians(self.a3))
-
-    @property
-    def V2(self):
-        return cos(radians(self.a1)) - cos(radians(self.a3))
-
-    @property
-    def V3(self):
-        return cos(radians(self.a3)) - cos(radians(self.a))
+        V2, V3 = cos(radians(self.a1)) - cos(radians(self.a3)), cos(radians(self.a3)) - cos(radians(self.a))
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V2 - self.R4 * V3) / sin(radians(self.a1))
 
     @property
     def depths(self):
+        W2 = sin(radians(self.a3)) - sin(radians(self.a1))
         return [
             self.H_v,
             self.H_v + self.R1 * sin(radians(self.a1)),
             self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)),
-            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)) + self.R3 * self.W2,
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)) + self.R3 * W2,
             self.H
         ]
 
@@ -293,7 +364,7 @@ class TanFiveInterval(DirectionalProfile):
         return [
             0,
             self.a1,
-            0,
+            self.a1,
             self.a3,
             self.a
         ]
@@ -310,42 +381,39 @@ class TanFiveInterval(DirectionalProfile):
 
 
 class FourInterval(DirectionalProfile):
-    """Класс, описывающий четырехинтервальную направляющую часть"""
+    """
+    Класс, описывающий четырехинтервальную направляющую часть.
+    Параметры, необходимые для расчёта свойств объекта:
+    :параметр H: float, H > 0, проектная глубина направляющей части профиля;
+    :параметр A: float, A > 0, проектное смещение скважины на проектной глубине;
+    :параметр a: float, 0 <= a <= 90, угол вхождения в пласт (градусы);
+    :параметр a1: float, 0 <= a1 <= 90, начальный зенитный угол;
+    :параметр R1: float, R1 > 0, величина радиуса 1-ого участка;
+    :параметр R3: float, R3 > 0, величина радиуса 2-ого участка (!!!);
+    :параметр а3: float, 0 <= a3 <= 90, зенитный угол в конце 3-ого участка;
+    """
 
     @property
     def R(self):
-        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * self.V4) / self.V5
+        V4, V5 = cos(radians(self.a1)) - cos(radians(self.a3)), cos(radians(self.a3)) - cos(radians(self.a))
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V4) / V5
 
     @property
     def H_v(self):
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * self.W4 - self.R * self.W5
+        W4, W5 = sin(radians(self.a3)) - sin(radians(self.a1)), sin(radians(self.a)) - sin(radians(self.a3))
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * W4 - self.R * W5
 
     @property
     def L(self):
         return super().L
 
     @property
-    def W4(self):
-        return sin(radians(self.a3)) - sin(radians(self.a1))
-
-    @property
-    def W5(self):
-        return sin(radians(self.a)) - sin(radians(self.a3))
-
-    @property
-    def V4(self):
-        return cos(radians(self.a1)) - cos(radians(self.a3))
-
-    @property
-    def V5(self):
-        return cos(radians(self.a3)) - cos(radians(self.a))
-
-    @property
     def depths(self):
+        W4 = sin(radians(self.a3)) - sin(radians(self.a1))
         return [
             self.H_v,
             self.H_v + self.R1 * sin(radians(self.a1)),
-            self.H_v + self.R1 * sin(radians(self.a1)) + self.R3 * self.W4,
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.R3 * W4,
             self.H
         ]
 
