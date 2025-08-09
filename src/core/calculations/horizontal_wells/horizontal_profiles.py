@@ -48,9 +48,47 @@ class HorizontalProfile(ABC):
         """Абстрактное свойство для расчета длины горизонтального участка"""
         raise NotImplementedError
 
+    @property
+    @abstractmethod
+    def depths(self):
+        """Абстрактное свойство для расчёта глубин по участкам"""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def lengths_of_the_bores(self):
+        """Абстрактное свойство для расчёта длин стволов по участкам"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def lengths_of_the_intervals(self):
+        """Абстрактное свойство для расчёта длин участков"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def dislocations(self):
+        """Абстрактное свойства для расчёта смещения по участкам"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def angles(self):
+        """Абстрактное свойство для расчёта зенитных углов по участкам"""
+        return NotImplementedError
+
+    @property
+    @abstractmethod
+    def intensities(self):
+        """Абстрактное свойство для расчёта интенсивности искривления участков"""
+        raise NotImplementedError
+
 
 class Tangential(HorizontalProfile):
-    """Класс, описывающий тангенциальный профиль"""
+    """
+    Класс, описывающий тангенциальный профиль
+    """
 
     @property
     def H_h(self):
@@ -72,21 +110,58 @@ class Tangential(HorizontalProfile):
     def a_h(self):
         return super().a_h
 
+    @property
+    def depths(self):
+        return [
+            self.H_h
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.S_l
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.S_l
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            self.A_h
+        ]
+
+    @property
+    def angles(self):
+        return [
+            0.0
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            0.0
+        ]
 
 class Descending(HorizontalProfile):
-    """Класс, описывающий нисходящий профиль"""
+    """
+    Класс, описывающий нисходящий профиль
+    """
 
     @property
     def R_h(self):
-        return (self.S_l**2 + self.T2**2) / (2 * self.T2)
+        return (self.S_l**2 + self.T1**2) / (2 * self.T1)
 
     @property
     def H_h(self):
-        return self.S_l * cos(radians(self.a)) + self.T2 * sin(radians(self.a)) + self.H
+        return self.S_l * cos(radians(self.a)) + self.T1 * sin(radians(self.a)) + self.H
 
     @property
     def A_h(self):
-        return self.S_l * sin(radians(self.a)) - self.T2 * cos(radians(self.a)) + self.A
+        return self.S_l * sin(radians(self.a)) - self.T1 * cos(radians(self.a)) + self.A
 
     @property
     def a_h(self):
@@ -96,13 +171,50 @@ class Descending(HorizontalProfile):
     def L_h(self):
         return -pi / 180 * (self.a_h - self.a) * self.R_h
 
+    @property
+    def depths(self):
+        return [
+            self.H_h
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.L_h
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.L_h
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            self.A_h
+        ]
+
+    @property
+    def angles(self):
+        return [
+            self.a_h
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            -57.3 /  (self.R_h / 10)
+        ]
 
 class Ascending(HorizontalProfile):
-    """Класс, описывающий восходящий профиль"""
+    """
+    Класс, описывающий восходящий профиль
+    """
 
     @property
     def R_h(self):
-        return ((self.S_l)**2 + (self.T1)**2) / (2 * self.T1)
+        return (self.S_l**2 + self.T1**2) / (2 * self.T1)
 
     @property
     def H_h(self):
@@ -120,9 +232,47 @@ class Ascending(HorizontalProfile):
     def L_h(self):
         return pi / 180 * (self.a_h - self.a) * self.R_h
 
+    @property
+    def depths(self):
+        return [
+            self.H_h
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.L_h
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.L_h
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            self.A_h
+        ]
+
+    @property
+    def angles(self):
+        return [
+            self.a_h
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            57.3 /  (self.R_h / 10)
+        ]
+
 
 class Undulant(HorizontalProfile):
-    """Класс, описывающий волнообразный профиль"""
+    """
+    Класс, описывающий волнообразный
+    """
 
     @property
     def R_h(self):
@@ -133,15 +283,47 @@ class Undulant(HorizontalProfile):
 
     @property
     def H_h(self):
-        return self.S_l * cos(self.a) + self.T2 * sin(self.a) + self.H
+        return self.S_l * cos(radians(self.a)) + self.T2 * sin(radians(self.a)) + self.H
 
     @property
     def A_h(self):
-        return self.S_l * sin(self.a) - self.T2 * cos(self.a) + self.A
+        return self.S_l * sin(radians(self.a)) - self.T2 * cos(radians(self.a)) + self.A
 
     @property
     def a_h(self):
         return self.a - asin(sqrt(2 * self.R_h * (self.T1 + self.T2) - (self.T1 - self.T2) ** 2) / self.R_h)
 
+    @property
     def L_h(self):
         return super().L_h
+
+    @property
+    def depths(self):
+        return [
+            self.H_h
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+        ]
+
+    @property
+    def angles(self):
+        return [
+        ]
+
+    @property
+    def intensities(self):
+        return [
+        ]

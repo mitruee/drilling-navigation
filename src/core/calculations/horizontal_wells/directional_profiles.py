@@ -119,21 +119,21 @@ class TwoInterval(DirectionalProfile):
     @property
     def dislocations(self):
         return [
-            0,
+            0.0,
             self.A
         ]
 
     @property
     def angles(self):
         return [
-            0,
+            0.0,
             self.a
         ]
 
     @property
     def intensities(self):
         return [
-            0,
+            0.0,
             57.3 / (self.R / 10)
         ]
 
@@ -187,7 +187,7 @@ class ThreeInterval(DirectionalProfile):
     @property
     def dislocations(self):
         return [
-            0,
+            0.0,
             self.R1 * (1 - cos(radians(self.a1))),
             self.A
         ]
@@ -195,7 +195,7 @@ class ThreeInterval(DirectionalProfile):
     @property
     def angles(self):
         return [
-            0,
+            0.0,
             self.a1,
             self.a
         ]
@@ -203,7 +203,7 @@ class ThreeInterval(DirectionalProfile):
     @property
     def intensities(self):
         return [
-            0,
+            0.0,
             57.3 / (self.R1 / 10),
             57.3 / (self.R / 10)
         ]
@@ -265,7 +265,7 @@ class TangentialFourInterval(DirectionalProfile):
     @property
     def dislocations(self):
         return [
-            0,
+            0.0,
             self.R1 * (1 - cos(radians(self.a1))),
             self.R1 * (1 - cos(radians(self.a1))) + self.L * sin(radians(self.a1)),
             self.A
@@ -274,7 +274,7 @@ class TangentialFourInterval(DirectionalProfile):
     @property
     def angles(self):
         return [
-            0,
+            0.0,
             self.a1,
             self.a1,
             self.a
@@ -283,9 +283,9 @@ class TangentialFourInterval(DirectionalProfile):
     @property
     def intensities(self):
         return [
-            0,
+            0.0,
             57.3 / (self.R1 / 10),
-            0,
+            0.0,
             57.3 / (self.R3 / 10)
         ]
 
@@ -352,7 +352,7 @@ class TangentialFiveInterval(DirectionalProfile):
     @property
     def dislocations(self):
         return [
-            0,
+            0.0,
             self.R1 * (1 - cos(radians(self.a1))),
             self.R1 * (1 - cos(radians(self.a1))) + self.L * sin(radians(self.a1)),
             self.R1 * (1 - cos(radians(self.a1))) + self.L * sin(radians(self.a1)) + self.R3 * (cos(radians(self.a1)) - cos(radians(self.a3))),
@@ -362,7 +362,7 @@ class TangentialFiveInterval(DirectionalProfile):
     @property
     def angles(self):
         return [
-            0,
+            0.0,
             self.a1,
             self.a1,
             self.a3,
@@ -372,9 +372,9 @@ class TangentialFiveInterval(DirectionalProfile):
     @property
     def intensities(self):
         return [
-            0,
+            0.0,
             57.3 / (self.R1 / 10),
-            0,
+            0.0,
             57.3 / (self.R3 / 10),
             57.3 / (self.R4 / 10)
         ]
@@ -438,7 +438,7 @@ class FourInterval(DirectionalProfile):
     @property
     def dislocations(self):
         return [
-            0,
+            0.0,
             self.R1 * (1 - cos(radians(self.a1))),
             self.R1 * (1 - cos(radians(self.a1))) + self.R3 * (cos(radians(self.a1)) - cos(radians(self.a3))),
             self.A
@@ -447,7 +447,7 @@ class FourInterval(DirectionalProfile):
     @property
     def angles(self):
         return [
-            0,
+            0.0,
             self.a1,
             self.a3,
             self.a
@@ -456,7 +456,7 @@ class FourInterval(DirectionalProfile):
     @property
     def intensities(self):
         return [
-            0,
+            0.0,
             57.3 / (self.R1 / 10),
             57.3 / (self.R3 / 10),
             57.3 / (self.R / 10)
