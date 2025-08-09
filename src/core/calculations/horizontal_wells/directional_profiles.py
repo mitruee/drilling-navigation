@@ -27,7 +27,7 @@ class DirectionalProfile(ABC):
 
     @property
     @abstractmethod
-    def H(self):
+    def H_v(self):
         """Абстрактное свойство для расчёта длины вертикального участка"""
         raise NotImplementedError
 
@@ -37,6 +37,11 @@ class DirectionalProfile(ABC):
         """Абстрактное свойство для расчёта длины участка стабилизации"""
         raise NotImplementedError
 
+    @property
+    @abstractmethod
+    def intensities(self):
+        """Абстрактное свойство для расчёта длины участка стабилизации"""
+        raise NotImplementedError
 
 
 class TwoInterval(DirectionalProfile):
@@ -44,16 +49,57 @@ class TwoInterval(DirectionalProfile):
 
     @property
     def R(self):
-        return self.A / (1 - cos(self.a))
+        return self.A / (1 - cos(radians(self.a)))
 
     @property
     def H_v(self):
-        return self.H - self.R * sin(self.a)
+        return self.H - self.R * sin(radians(self.a))
 
     @property
     def L(self):
         return super().L
 
+    @property
+    def depth(self):
+        return [
+            self.H_v,
+            self.H
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.H_v,
+            self.H_v + (pi * self.R * self.a) / 180
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.H_v,
+            self.lengths_of_the_bores[1] - self.lengths_of_the_bores[0]
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            0,
+            self.A
+        ]
+
+    @property
+    def angles(self):
+        return [
+            0,
+            self.a
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            0,
+            57.3 / (self.R / 10)
+        ]
 
 
 class ThreeInterval(DirectionalProfile):
@@ -61,20 +107,67 @@ class ThreeInterval(DirectionalProfile):
 
     @property
     def R(self):
-        return self.A - ((self.R1 * (1 - cos(self.a1))) / (cos(self.a1) - cos(self.a)))
+        return self.A - ((self.R1 * (1 - cos(radians(self.a1)))) / (cos(radians(self.a1)) - cos(radians(self.a))))
 
     @property
     def H_v(self):
-        return self.H - self.R1 * sin(self.a1) - self.R * (sin(self.a) - sin(self.a1))
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R * (sin(radians(self.a)) - sin(radians(self.a1)))
 
     @property
     def L(self):
         return super().L
 
+    @property
+    def depth(self):
+        return [
+            self.H_v,
+            self.H_v + self.R1 * sin(radians(self.a1)),
+            self.H
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.H_v,
+            self.H_v + (pi * self.R1 * self.a1) / 180,
+            self.H_v + (pi * (self.R1 * self.a1 + self.R * (self.a - self.a1))) / 180
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.H_v,
+            self.lengths_of_the_bores[1] - self.lengths_of_the_bores[0],
+            self.lengths_of_the_bores[2] - self.lengths_of_the_bores[1]
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            0,
+            self.R1 * (1 - cos(radians(self.a1))),
+            self.A
+        ]
+
+    @property
+    def angles(self):
+        return [
+            0,
+            self.a1,
+            self.a
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            0,
+            57.3 / (self.R1 / 10),
+            57.3 / (self.R / 10)
+        ]
 
 
 class TanFourInterval(DirectionalProfile):
-    """Класс, описывающий четырёхинтервальную направляющую часть с участком стабилизации"""
+    """Класс, описывающий четырёхинтервальную тангенциальную направляющую часть с участком стабилизации"""
 
     @property
     def R(self):
@@ -82,14 +175,46 @@ class TanFourInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        W1 = sin(self.a) - sin(self.a1)
-        return self.H - self.R1 * sin(self.a1) - self.R3 * W1 - self.L * cos(self.a1)
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * self.W - self.L * cos(radians(self.a1))
 
     @property
     def L(self):
-        V = cos(self.a) - cos(self.a1)
-        return (self.A - self.R1 * (1 - cos(self.a1)) - self.R3 * V) / sin(self.a)
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * self.V) / sin(radians(self.a1))
 
+    @property
+    def W(self):
+        return sin(self.a) - sin(self.a1)
+
+    @property
+    def V(self):
+        return cos(self.a1) - cos(self.a)
+
+    @property
+    def dislocations(self):
+        return [
+            0,
+            self.R1 * (1 - cos(radians(self.a1))),
+            self.R1 * (1 - cos(radians(self.a1))) + self.L * sin(radians(self.a1)),
+            self.A
+        ]
+
+    @property
+    def angles(self):
+        return [
+            0,
+            self.a1,
+            self.a1,
+            self.a
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            0,
+            57.3 / (self.R1 / 10),
+            0,
+            57.3 / (self.R3 / 10)
+        ]
 
 
 class TanFiveInterval(DirectionalProfile):
@@ -101,29 +226,170 @@ class TanFiveInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        W2, W3 = sin(self.a3) - sin(self.a1), sin(self.a) - sin(self.a3)
-        return self.H - self.R1 * sin(self.a1) - self.R3 * W2  - self.L * cos(self.a3) - self.R4 * W3
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * self.W2  - self.L * cos(radians(self.a1)) - self.R4 * self.W3
 
     @property
     def L(self):
-        V2, V3 = cos(self.a1) - cos(self.a3), cos(self.a3) - cos(self.a)
-        return (self.A - self.R1 * (1 - cos(self.a1)) - self.R3 * V2 - self.R4 * V3) / sin(self.a1)
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * self.V2 - self.R4 * self.V3) / sin(radians(self.a1))
+
+    @property
+    def W2(self):
+        return sin(radians(self.a3)) - sin(radians(self.a1))
+
+    @property
+    def W3(self):
+        return sin(radians(self.a)) - sin(radians(self.a3))
+
+    @property
+    def V2(self):
+        return cos(radians(self.a1)) - cos(radians(self.a3))
+
+    @property
+    def V3(self):
+        return cos(radians(self.a3)) - cos(radians(self.a))
+
+    @property
+    def depths(self):
+        return [
+            self.H_v,
+            self.H_v + self.R1 * sin(radians(self.a1)),
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)),
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)) + self.R3 * self.W2,
+            self.H
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.H_v,
+            self.H_v + (pi * self.R1 * self.a1) / 180,
+            self.H_v + self.L + (pi * (self.R1 * self.a1)) / 180,
+            self.H_v + self.L + (pi * (self.R1 * self.a1 + self.R3 * (self.a3 - self.a1))) / 180,
+            self.H_v + self.L + (pi * (self.R1 * self.a1 + self.R3 * (self.a3 - self.a1) + self.R4 * (self.a - self.a3))) / 180,
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.H_v,
+            self.lengths_of_the_bores[1] - self.lengths_of_the_bores[0],
+            self.lengths_of_the_bores[2] - self.lengths_of_the_bores[1],
+            self.lengths_of_the_bores[3] - self.lengths_of_the_bores[2],
+            self.lengths_of_the_bores[4] - self.lengths_of_the_bores[3]
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            0,
+            self.R1 * (1 - cos(radians(self.a1))),
+            self.R1 * (1 - cos(radians(self.a1))) + self.L * sin(radians(self.a1)),
+            self.R1 * (1 - cos(radians(self.a1))) + self.L * sin(radians(self.a1)) + self.R3 * (cos(radians(self.a1)) - cos(radians(self.a3))),
+            self.A
+        ]
+
+    @property
+    def angles(self):
+        return [
+            0,
+            self.a1,
+            0,
+            self.a3,
+            self.a
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            0,
+            57.3 / (self.R1 / 10),
+            0,
+            57.3 / (self.R3 / 10),
+            57.3 / (self.R4 / 10)
+        ]
 
 
-
-class FiveInterval(DirectionalProfile):
-    """Класс, описывающий пятиинтервальную направляющую часть"""
+class FourInterval(DirectionalProfile):
+    """Класс, описывающий четырехинтервальную направляющую часть"""
 
     @property
     def R(self):
-        V4, V5 = cos(self.a1) - cos(self.a3), cos(self.a3) - cos(self.a1)
-        return (self.A - (1 - cos(self.a1)) * self.R1 * V4) / V5
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * self.V4) / self.V5
 
     @property
     def H_v(self):
-        W4, W5 = sin(self.a3) - sin(self.a1), sin(self.a) - sin(self.a3)
-        return self.H - self.R1 * sin(self.a1) - self.R3 * W4 - self.R * W5
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * self.W4 - self.R * self.W5
 
     @property
     def L(self):
         return super().L
+
+    @property
+    def W4(self):
+        return sin(radians(self.a3)) - sin(radians(self.a1))
+
+    @property
+    def W5(self):
+        return sin(radians(self.a)) - sin(radians(self.a3))
+
+    @property
+    def V4(self):
+        return cos(radians(self.a1)) - cos(radians(self.a3))
+
+    @property
+    def V5(self):
+        return cos(radians(self.a3)) - cos(radians(self.a))
+
+    @property
+    def depths(self):
+        return [
+            self.H_v,
+            self.H_v + self.R1 * sin(radians(self.a1)),
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.R3 * self.W4,
+            self.H
+        ]
+
+    @property
+    def lengths_of_the_bores(self):
+        return [
+            self.H_v,
+            self.H_v + (pi * self.R1 * self.a1) / 180,
+            self.H_v + (pi * (self.R1 * self.a1 + self.R3 * (self.a3 - self.a1))) / 180,
+            self.H_v + (pi * (self.R1 * self.a1 + self.R3 * (self.a3 - self.a1) + self.R * (self.a - self.a3))) / 180,
+        ]
+
+    @property
+    def lengths_of_the_intervals(self):
+        return [
+            self.H_v,
+            self.lengths_of_the_bores[1] - self.lengths_of_the_bores[0],
+            self.lengths_of_the_bores[2] - self.lengths_of_the_bores[1],
+            self.lengths_of_the_bores[3] - self.lengths_of_the_bores[2]
+        ]
+
+    @property
+    def dislocations(self):
+        return [
+            0,
+            self.R1 * (1 - cos(radians(self.a1))),
+            self.R1 * (1 - cos(radians(self.a1))) + self.R3 * (cos(radians(self.a1)) - cos(radians(self.a3))),
+            self.A
+        ]
+
+    @property
+    def angles(self):
+        return [
+            0,
+            self.a1,
+            self.a3,
+            self.a
+        ]
+
+    @property
+    def intensities(self):
+        return [
+            0,
+            57.3 / (self.R1 / 10),
+            57.3 / (self.R3 / 10),
+            57.3 / (self.R / 10)
+        ]

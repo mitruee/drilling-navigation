@@ -13,7 +13,7 @@ class HorizontalProfile(ABC):
     S_l: float # протяженность горизонтального участка по пласту
     T1: float # предельное смещение горизонтального участка в направлении вверх
     T2: float # предельное смещение горизонтального участка в направлении вниз
-    R1: float # радиус 1-ого участка
+    R1: float # радиус кривизны 1-ого участка волнообразного профиля
 
     def __init__(self, *args):
         self.__dict__.update(zip(self._NAMES, args))
@@ -71,8 +71,6 @@ class Tangential(HorizontalProfile):
     @property
     def a_h(self):
         return super().a_h
-
-
 
 
 class Descending(HorizontalProfile):
@@ -144,8 +142,6 @@ class Undulant(HorizontalProfile):
     @property
     def a_h(self):
         return self.a - asin(sqrt(2 * self.R_h * (self.T1 + self.T2) - (self.T1 - self.T2) ** 2) / self.R_h)
-    
 
-    
-well = Tangential(1200, 200, 80, 500)
-print(well.H_h, well.A_h)
+    def L_h(self):
+        return super().L_h
