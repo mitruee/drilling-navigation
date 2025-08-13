@@ -1,6 +1,0 @@
-.idea/
-*.iml
-*.ipr
-*.iws
-.gitignore
-src/core/calculations/horizontal_wells

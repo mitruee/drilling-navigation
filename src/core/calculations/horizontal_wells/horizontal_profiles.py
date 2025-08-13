@@ -76,7 +76,13 @@ class HorizontalProfile(ABC):
     @abstractmethod
     def angles(self):
         """Абстрактное свойство для расчёта зенитных углов по участкам"""
-        return NotImplementedError
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def radii(self):
+        """Абстрактное свойство для расчёта радиусов по участкам"""
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -136,6 +142,12 @@ class Tangential(HorizontalProfile):
 
     @property
     def angles(self):
+        return [
+            0.0
+        ]
+
+    @property
+    def radii(self):
         return [
             0.0
         ]
@@ -202,6 +214,12 @@ class Descending(HorizontalProfile):
         ]
 
     @property
+    def radii(self):
+        return [
+            self.R_h
+        ]
+
+    @property
     def intensities(self):
         return [
             -57.3 /  (self.R_h / 10)
@@ -260,6 +278,12 @@ class Ascending(HorizontalProfile):
     def angles(self):
         return [
             self.a_h
+        ]
+
+    @property
+    def radii(self):
+        return [
+            self.R_h
         ]
 
     @property
@@ -327,3 +351,6 @@ class Undulant(HorizontalProfile):
     def intensities(self):
         return [
         ]
+
+profile = Descending(1678, 900, 70, 100, 50)
+print(profile.R_h)
