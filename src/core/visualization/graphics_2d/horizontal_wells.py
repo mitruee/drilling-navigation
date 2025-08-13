@@ -79,5 +79,4 @@ class DirectionalProfilesGraphic:
 # profile = DirectionalProfilesGraphic(ThreeInterval(1600, 400, 30, 40, 400))
 profile = DirectionalProfilesGraphic(TangentialFourInterval(1678, 900, 40, 30, 382, 1900), Ascending(1678, 900, 70, 100, 20))
 print(profile.horizontal_profile.__dict__)
-print(profile.y)
 profile.draw()
