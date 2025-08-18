@@ -1,6 +1,5 @@
 from src.core.calculations.horizontal_wells.directional_profiles import *
 from src.core.calculations.horizontal_wells.horizontal_profiles import *
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,6 +7,10 @@ import numpy as np
 class ProfileGraphic(ABC):
     @abstractmethod
     def __init__(self, profile, axes, start_point=(0.0, 0.0)):
+        axes.set_xlim(-profile.H - 500, profile.H + 500)
+        axes.set_ylim(-profile.H - 500, 0)
+        axes.axis('equal')
+
         self.profile, self.axes = profile, axes
 
         x0, y0 = start_point
@@ -28,26 +31,19 @@ class ProfileGraphic(ABC):
     def draw_arc(self, start_point, end_point, radius):
         raise NotImplementedError
 
-    def draw_part(self, start_point, end_point, radius):
-        if not radius:
-            self.draw_straight(start_point, end_point)
-        else:
-            self.draw_arc(start_point, end_point, radius)
-
     def draw(self):
         for i in range(len(self.pairs_of_points)):
-            self.draw_part(*self.pairs_of_points[i], self.radii[i])
-
-        self.axes.set_xlim(-self.profile.H - 500, self.profile.H + 500)
-        self.axes.set_ylim(-self.profile.H - 500, 0)
-        self.axes.axis('equal')
+            if not self.radii[i]:
+                self.draw_straight(*self.pairs_of_points[i])
+            else:
+                self.draw_arc(*self.pairs_of_points[i], self.radii[i])
 
 
 class DirectionalProfilesGraphic(ProfileGraphic):
-    def __init__(self, direction_profile, axes, start_point=(0.0, 0.0)):
+    def __init__(self, direction_profile, axes):
         if not isinstance(direction_profile, DirectionalProfile):
             raise TypeError(f"Unsupported profile type: {type(direction_profile)}")
-        super().__init__(direction_profile, axes, start_point)
+        super().__init__(direction_profile, axes)
 
     def draw_arc(self, start_point, end_point, radius):
         x1, y1 = start_point
@@ -70,7 +66,7 @@ class DirectionalProfilesGraphic(ProfileGraphic):
 
 
 class HorizontalProfilesGraphic(ProfileGraphic):
-    def __init__(self, horizontal_profile, axes, start_point=(0.0, 0.0)):
+    def __init__(self, horizontal_profile, axes):
         if not isinstance(horizontal_profile, HorizontalProfile):
             raise TypeError(f"Unsupported profile type: {type(horizontal_profile)}")
         super().__init__(horizontal_profile, axes, start_point=(horizontal_profile.A, -horizontal_profile.H))
@@ -104,7 +100,7 @@ class HorizontalProfilesGraphic(ProfileGraphic):
 fig1, axes1 = plt.subplots(figsize=(6, 6))
 
 directional_profile = DirectionalProfilesGraphic(TangentialFourInterval(1678, 900, 40, 30, 382, 1900), axes1)
-horizontal_profile = HorizontalProfilesGraphic(Ascending(1678, 900, 70, 100, 20), axes1)
+horizontal_profile = HorizontalProfilesGraphic(Descending(1678, 900, 70, 100, 20), axes1)
 
 directional_profile.draw()
 horizontal_profile.draw()
@@ -113,7 +109,7 @@ plt.show()
 fig2, axes2 = plt.subplots(figsize=(6, 6))
 
 directional_profile = DirectionalProfilesGraphic(ThreeInterval(1600, 400, 30, 40, 400), axes2)
-horizontal_profile = HorizontalProfilesGraphic(Ascending(1600, 400, 70, 100, 20), axes2)
+horizontal_profile = HorizontalProfilesGraphic(Descending(1600, 400, 70, 100, 20), axes2)
 
 directional_profile.draw()
 horizontal_profile.draw()
