@@ -351,6 +351,3 @@ class Undulant(HorizontalProfile):
     def intensities(self):
         return [
         ]
-
-profile = Descending(1678, 900, 70, 100, 50)
-print(profile.R_h)

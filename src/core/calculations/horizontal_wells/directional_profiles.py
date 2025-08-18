@@ -167,7 +167,7 @@ class ThreeInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R * (sin(radians(self.a)) - sin(radians(self.a1)))
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R * abs(sin(radians(self.a)) - sin(radians(self.a1)))
 
     @property
     def L(self):
