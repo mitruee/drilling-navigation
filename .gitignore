@@ -1,0 +1,12 @@
+# VirtualEnv
+.venv/
+venv/
+
+# JetBrains IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Git
+.gitignore
