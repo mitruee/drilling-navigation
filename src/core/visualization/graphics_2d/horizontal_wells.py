@@ -7,9 +7,10 @@ import numpy as np
 class ProfileGraphic(ABC):
     @abstractmethod
     def __init__(self, profile, axes, start_point=(0.0, 0.0)):
-        axes.set_xlim(-profile.H - 500, profile.H + 500)
-        axes.set_ylim(-profile.H - 500, 0)
         axes.axis('equal')
+        axes.set_xlim(-profile.A * 2, profile.A * 2)
+        axes.set_ylim(-profile.H - 500, 0)
+        axes.grid(True, alpha=0.3)
 
         self.profile, self.axes = profile, axes
 
@@ -22,21 +23,29 @@ class ProfileGraphic(ABC):
         self.pairs_of_points = [[coordinates[i], coordinates[i + 1]] for i in range(0, len(coordinates) - 1, 2)]
         self.radii = profile.radii
 
-    def draw_straight(self, start_point, end_point):
+    def draw_straight(self, start_point, end_point, linewidth):
         x1, y1 = start_point
         x2, y2 = end_point
-        self.axes.plot([x1, x2], [y1, y2])
+
+        if x1 == x2:
+            label = 'Вертикальный участок'
+        else:
+            label = 'Участок стабилизации'
+
+        self.axes.plot([x1, x2], [y1, y2], label=label, linewidth=linewidth)
 
     @abstractmethod
-    def draw_arc(self, start_point, end_point, radius):
+    def draw_arc(self, start_point, end_point, radius, linewidth):
         raise NotImplementedError
 
     def draw(self):
         for i in range(len(self.pairs_of_points)):
             if not self.radii[i]:
-                self.draw_straight(*self.pairs_of_points[i])
+                self.draw_straight(*self.pairs_of_points[i], linewidth=2.3)
             else:
-                self.draw_arc(*self.pairs_of_points[i], self.radii[i])
+                self.draw_arc(*self.pairs_of_points[i], self.radii[i], linewidth=2.4)
+
+        self.axes.legend(loc='lower left', fontsize=9)
 
 
 class DirectionalProfilesGraphic(ProfileGraphic):
@@ -45,7 +54,8 @@ class DirectionalProfilesGraphic(ProfileGraphic):
             raise TypeError(f"Unsupported profile type: {type(direction_profile)}")
         super().__init__(direction_profile, axes)
 
-    def draw_arc(self, start_point, end_point, radius):
+    def draw_arc(self, start_point, end_point, radius, linewidth):
+
         x1, y1 = start_point
         x2, y2 = end_point
 
@@ -62,7 +72,13 @@ class DirectionalProfilesGraphic(ProfileGraphic):
         x = np.linspace(x1, x2, 100)
         y = circle(x)
 
-        self.axes.plot(x, y)
+        if center_y < -y2:
+            label = 'Стабилизация зенитного угла'
+        else:
+            label = 'Набор зенитного угла'
+
+
+        self.axes.plot(x, y, label=label, linewidth=linewidth)
 
 
 class HorizontalProfilesGraphic(ProfileGraphic):
@@ -71,7 +87,7 @@ class HorizontalProfilesGraphic(ProfileGraphic):
             raise TypeError(f"Unsupported profile type: {type(horizontal_profile)}")
         super().__init__(horizontal_profile, axes, start_point=(horizontal_profile.A, -horizontal_profile.H))
 
-    def draw_arc(self, start_point, end_point, radius):
+    def draw_arc(self, start_point, end_point, radius, linewidth):
         x1, y1 = start_point
         x2, y2 = end_point
 
@@ -86,21 +102,31 @@ class HorizontalProfilesGraphic(ProfileGraphic):
             center_y = radius * sin(pi - angle_b2 - angle_y) - y2
             circle = lambda x: center_y - (radius ** 2 - (x - center_x) ** 2) ** 0.5
 
+            label = 'Горизонтальный участок (восходящий)'
+
         if isinstance(self.profile, Descending):
             center_x = -radius * cos(pi - angle_b2 - angle_y) + x1
             center_y = -radius * cos(pi - angle_b1 - angle_y) - y2
             circle = lambda x: center_y + (radius ** 2 - (x - center_x) ** 2) ** 0.5
 
+            label = 'Горизонтальный участок (нисходящий)'
+
+        if isinstance(self.profile, Undulant):
+
+            #Код
+
+            label = 'Горизонтальный участок (Волнообразный)'
+
         x = np.linspace(x1, x2, 100)
         y = circle(x)
 
-        self.axes.plot(x, y)
+        self.axes.plot(x, y, label=label, linewidth=linewidth)
 
 
-fig1, axes1 = plt.subplots(figsize=(6, 6))
+fig1, axes1 = plt.subplots(figsize=(9, 6))
 
 directional_profile = DirectionalProfilesGraphic(TangentialFourInterval(1678, 900, 40, 30, 382, 1900), axes1)
-horizontal_profile = HorizontalProfilesGraphic(Descending(1678, 900, 70, 100, 20), axes1)
+horizontal_profile = HorizontalProfilesGraphic(Descending(1678, 900, 70, 400, 20), axes1)
 
 directional_profile.draw()
 horizontal_profile.draw()

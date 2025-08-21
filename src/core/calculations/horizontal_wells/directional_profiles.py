@@ -75,12 +75,6 @@ class DirectionalProfile(ABC):
 
     @property
     @abstractmethod
-    def radii(self):
-        """Абстрактное свойство для расчёта радиусов по участкам"""
-        return NotImplementedError
-
-    @property
-    @abstractmethod
     def intensities(self):
         """Абстрактное свойство для расчёта интенсивности искривления участков"""
         raise NotImplementedError
@@ -147,13 +141,6 @@ class TwoInterval(DirectionalProfile):
         return [
             0.0,
             self.a
-        ]
-
-    @property
-    def radii(self):
-        return [
-            0.0,
-            self.R
         ]
 
     @property
@@ -232,14 +219,6 @@ class ThreeInterval(DirectionalProfile):
             0.0,
             self.a1,
             self.a
-        ]
-
-    @property
-    def radii(self):
-        return [
-            0.0,
-            self.R1,
-            self.R
         ]
 
     @property
@@ -329,15 +308,6 @@ class TangentialFourInterval(DirectionalProfile):
             self.a1,
             self.a1,
             self.a
-        ]
-
-    @property
-    def radii(self):
-        return [
-            0.0,
-            self.R1,
-            0.0,
-            self.R3
         ]
 
     @property
