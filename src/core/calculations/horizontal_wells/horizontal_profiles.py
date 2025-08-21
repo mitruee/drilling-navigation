@@ -324,7 +324,6 @@ class Undulant(HorizontalProfile):
     @property
     def depths(self):
         return [
-            self.H_h
         ]
 
     @property

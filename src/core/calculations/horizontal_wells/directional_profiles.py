@@ -39,6 +39,12 @@ class DirectionalProfile(ABC):
 
     @property
     @abstractmethod
+    def radii(self):
+        """Абстрактное свойство для получения массива радиусов"""
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def depths(self):
         """Абстрактное свойство для расчёта глубин по участкам"""
         raise NotImplementedError
@@ -100,6 +106,13 @@ class TwoInterval(DirectionalProfile):
     @property
     def L(self):
         return super().L
+
+    @property
+    def radii(self):
+        return [
+            0.0,
+            self.R
+        ]
 
     @property
     def depths(self):
@@ -172,6 +185,14 @@ class ThreeInterval(DirectionalProfile):
     @property
     def L(self):
         return super().L
+
+    @property
+    def radii(self):
+        return [
+            0.0,
+            self.R1,
+            self.R
+        ]
 
     @property
     def depths(self):
@@ -255,6 +276,15 @@ class TangentialFourInterval(DirectionalProfile):
     def L(self):
         V = cos(radians(self.a1)) - cos(radians(self.a))
         return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V) / sin(radians(self.a))
+
+    @property
+    def radii(self):
+        return [
+            0.0,
+            self.R1,
+            0.0,
+            self.R3
+        ]
 
     @property
     def depths(self):
@@ -349,6 +379,16 @@ class TangentialFiveInterval(DirectionalProfile):
         return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V2 - self.R4 * V3) / sin(radians(self.a1))
 
     @property
+    def radii(self):
+        return [
+            0.0,
+            self.R1,
+            0.0,
+            self.R3,
+            self.R4
+        ]
+
+    @property
     def depths(self):
         W2 = sin(radians(self.a3)) - sin(radians(self.a1))
         return [
@@ -436,6 +476,15 @@ class FourInterval(DirectionalProfile):
     @property
     def L(self):
         return super().L
+
+    @property
+    def radii(self):
+        return [
+            0.0,
+            self.R1,
+            self.R3,
+            self.R
+        ]
 
     @property
     def depths(self):
