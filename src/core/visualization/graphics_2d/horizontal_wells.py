@@ -5,6 +5,8 @@ import numpy as np
 
 
 class ProfileGraphic(ABC):
+    """Абстрактный класс, описывающий график профиля скважины"""
+
     @abstractmethod
     def __init__(self, profile, axes, start_point=(0.0, 0.0)):
         axes.axis('equal')
@@ -24,6 +26,8 @@ class ProfileGraphic(ABC):
         self.radii = profile.radii
 
     def draw_straight(self, start_point, end_point, linewidth):
+        """Метод для построения прямых участков профиля скважины"""
+
         x1, y1 = start_point
         x2, y2 = end_point
 
@@ -36,9 +40,12 @@ class ProfileGraphic(ABC):
 
     @abstractmethod
     def draw_arc(self, start_point, end_point, radius, linewidth):
+        """Абстрактное метод для построения кривых участков профиля скважины"""
         raise NotImplementedError
 
     def draw(self):
+        """Метод для добавления участков профиля скважины на график"""
+
         for i in range(len(self.pairs_of_points)):
             if not self.radii[i]:
                 self.draw_straight(*self.pairs_of_points[i], linewidth=2.3)
@@ -49,6 +56,8 @@ class ProfileGraphic(ABC):
 
 
 class DirectionalProfilesGraphic(ProfileGraphic):
+    """Класс, описывающий график направляющей части профиля скважины"""
+
     def __init__(self, direction_profile, axes):
         if not isinstance(direction_profile, DirectionalProfile):
             raise TypeError(f"Unsupported profile type: {type(direction_profile)}")
@@ -77,11 +86,12 @@ class DirectionalProfilesGraphic(ProfileGraphic):
         else:
             label = 'Набор зенитного угла'
 
-
         self.axes.plot(x, y, label=label, linewidth=linewidth)
 
 
 class HorizontalProfilesGraphic(ProfileGraphic):
+    """Класс, описывающий график горизонтальной части профиля скважины"""
+
     def __init__(self, horizontal_profile, axes):
         if not isinstance(horizontal_profile, HorizontalProfile):
             raise TypeError(f"Unsupported profile type: {type(horizontal_profile)}")
@@ -121,22 +131,3 @@ class HorizontalProfilesGraphic(ProfileGraphic):
         y = circle(x)
 
         self.axes.plot(x, y, label=label, linewidth=linewidth)
-
-
-fig1, axes1 = plt.subplots(figsize=(9, 6))
-
-directional_profile = DirectionalProfilesGraphic(TangentialFourInterval(1678, 900, 40, 30, 382, 1900), axes1)
-horizontal_profile = HorizontalProfilesGraphic(Descending(1678, 900, 70, 400, 20), axes1)
-
-directional_profile.draw()
-horizontal_profile.draw()
-plt.show()
-
-fig2, axes2 = plt.subplots(figsize=(6, 6))
-
-directional_profile = DirectionalProfilesGraphic(ThreeInterval(1600, 400, 30, 40, 400), axes2)
-horizontal_profile = HorizontalProfilesGraphic(Descending(1600, 400, 70, 100, 20), axes2)
-
-directional_profile.draw()
-horizontal_profile.draw()
-plt.show()
