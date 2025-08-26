@@ -358,6 +358,3 @@ class Undulant(HorizontalProfile):
     def intensities(self):
         return [
         ]
-
-undulant = Undulant(2000, 1000, 70, 400, 50, 75, 350)
-print(undulant.R_h)
