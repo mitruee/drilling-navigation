@@ -167,7 +167,7 @@ class ThreeInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R * (sin(radians(self.a)) - sin(radians(self.a1)))
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R * abs(sin(radians(self.a)) - sin(radians(self.a1)))
 
     @property
     def L(self):
@@ -248,13 +248,13 @@ class TangentialFourInterval(DirectionalProfile):
 
     @property
     def H_v(self):
-        W = sin(self.a) - sin(self.a1)
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * W - self.L * cos(radians(self.a1))
+        W = sin(radians(self.a)) - sin(radians(self.a1))
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * abs(W) - self.L * cos(radians(self.a1))
 
     @property
     def L(self):
-        V = cos(self.a1) - cos(self.a)
-        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V) / sin(radians(self.a1))
+        V = cos(radians(self.a1)) - cos(radians(self.a))
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * abs(V)) / sin(radians(self.a))
 
     @property
     def radii(self):
@@ -341,12 +341,12 @@ class TangentialFiveInterval(DirectionalProfile):
     @property
     def H_v(self):
         W2, W3 = sin(radians(self.a3)) - sin(radians(self.a1)), sin(radians(self.a)) - sin(radians(self.a3))
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * W2  - self.L * cos(radians(self.a1)) - self.R4 * W3
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * abs(W2)  - self.L * cos(radians(self.a1)) - self.R4 * abs(W3)
 
     @property
     def L(self):
         V2, V3 = cos(radians(self.a1)) - cos(radians(self.a3)), cos(radians(self.a3)) - cos(radians(self.a))
-        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V2 - self.R4 * V3) / sin(radians(self.a1))
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * abs(V2) - self.R4 * abs(V3)) / sin(radians(self.a1))
 
     @property
     def radii(self):
@@ -365,7 +365,7 @@ class TangentialFiveInterval(DirectionalProfile):
             self.H_v,
             self.H_v + self.R1 * sin(radians(self.a1)),
             self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)),
-            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)) + self.R3 * W2,
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.L * cos(radians(self.a1)) + self.R3 * abs(W2),
             self.H
         ]
 
@@ -436,12 +436,12 @@ class FourInterval(DirectionalProfile):
     @property
     def R(self):
         V4, V5 = cos(radians(self.a1)) - cos(radians(self.a3)), cos(radians(self.a3)) - cos(radians(self.a))
-        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * V4) / V5
+        return (self.A - self.R1 * (1 - cos(radians(self.a1))) - self.R3 * abs(V4)) / abs(V5)
 
     @property
     def H_v(self):
         W4, W5 = sin(radians(self.a3)) - sin(radians(self.a1)), sin(radians(self.a)) - sin(radians(self.a3))
-        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * W4 - self.R * W5
+        return self.H - self.R1 * sin(radians(self.a1)) - self.R3 * abs(W4) - self.R * abs(W5)
 
     @property
     def L(self):
@@ -462,7 +462,7 @@ class FourInterval(DirectionalProfile):
         return [
             self.H_v,
             self.H_v + self.R1 * sin(radians(self.a1)),
-            self.H_v + self.R1 * sin(radians(self.a1)) + self.R3 * W4,
+            self.H_v + self.R1 * sin(radians(self.a1)) + self.R3 *  abs(W4),
             self.H
         ]
 

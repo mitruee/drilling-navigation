@@ -1,3 +1,12 @@
-.gitignore
+# VirtualEnv
+.venv/
+venv/
+
+# JetBrains IDE
 .idea/
-src/core/calculations/horizontal_wells
+*.iml
+*.ipr
+*.iws
+
+# Git
+.gitignore

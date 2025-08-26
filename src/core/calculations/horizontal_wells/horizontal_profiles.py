@@ -1,6 +1,8 @@
 from math import *
 from abc import ABC, abstractmethod
 
+from numpy.ma.core import arccos
+
 
 class HorizontalProfile(ABC):
     """Абстрактный класс, описывающий горизонтальную часть профиля скважины"""
@@ -76,7 +78,13 @@ class HorizontalProfile(ABC):
     @abstractmethod
     def angles(self):
         """Абстрактное свойство для расчёта зенитных углов по участкам"""
-        return NotImplementedError
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def radii(self):
+        """Абстрактное свойство для расчёта радиусов по участкам"""
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -136,6 +144,12 @@ class Tangential(HorizontalProfile):
 
     @property
     def angles(self):
+        return [
+            0.0
+        ]
+
+    @property
+    def radii(self):
         return [
             0.0
         ]
@@ -202,6 +216,12 @@ class Descending(HorizontalProfile):
         ]
 
     @property
+    def radii(self):
+        return [
+            self.R_h
+        ]
+
+    @property
     def intensities(self):
         return [
             -57.3 /  (self.R_h / 10)
@@ -263,6 +283,12 @@ class Ascending(HorizontalProfile):
         ]
 
     @property
+    def radii(self):
+        return [
+            self.R_h
+        ]
+
+    @property
     def intensities(self):
         return [
             57.3 /  (self.R_h / 10)
@@ -276,10 +302,10 @@ class Undulant(HorizontalProfile):
 
     @property
     def R_h(self):
-        K = self.S_l ** 2 + 2 * (self.R1 + self.T2) + self.T2 ** 2
-        J = 8 * self.S_l ** 2 * self.R1 * self.T1 - 4 * self.S_l ** 2 * self.T1 ** 2 - K ** 2
-        F = 4 * K * self.T2 + 8 * self.S_l ** 2 * self.T1
-        return (-F + sqrt(F ** 2 + 16 * self.T2 ** 2 * J)) / (-8 * self.T2 ** 2)
+        AB = self.R1 * sqrt(2 - cos(radians(self.a)))
+        a = sqrt(AB ** 2 - self.T1 ** 2)
+        fetta = atan(a / self.T1)
+        return (self.S_l - a) / (2 * cos(fetta))
 
     @property
     def H_h(self):
@@ -323,6 +349,15 @@ class Undulant(HorizontalProfile):
         ]
 
     @property
+    def radii(self):
+        return [
+            self.R_h
+        ]
+
+    @property
     def intensities(self):
         return [
         ]
+
+undulant = Undulant(2000, 1000, 70, 400, 50, 75, 350)
+print(undulant.R_h)
