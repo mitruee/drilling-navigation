@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run GUI Horizontal",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "core.gui.gui_horizontal",
+            "justMyCode": true,
+            "env": {
+                "PYTHONPATH": "D:/burenie/src"
+            }
+        }
+    ]
+}

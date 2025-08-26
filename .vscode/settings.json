@@ -1,0 +1,10 @@
+{
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.extraPaths": [
+        "D:/burenie/src"
+    ],
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "D:/burenie/src"
+    },
+    "python-envs.pythonProjects": []
+}
