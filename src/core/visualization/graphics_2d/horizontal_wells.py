@@ -20,6 +20,8 @@ class ProfileGraphic(ABC):
         x = [x0] + profile.dislocations
         y = [y0] + list(map(lambda depth: -depth, profile.depths))
 
+        self.x, self.y = x, y
+
         coordinates = list(zip(np.repeat(x, 2), np.repeat(y, 2)))[1:-1]
 
         self.pairs_of_points = [[coordinates[i], coordinates[i + 1]] for i in range(0, len(coordinates) - 1, 2)]
