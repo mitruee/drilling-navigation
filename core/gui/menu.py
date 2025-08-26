@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 from .gui_horizontal import Horizontal_Well
-from .gui_directional import Directional_Well
+from .gui_inclined import Directional_Well
 import os
 
 class Menu(QWidget):

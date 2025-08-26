@@ -4,17 +4,17 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-class Directional_Well(QWidget):
+class Inclined_Well(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Профиль наклонной скважины")
         self.setMinimumSize(900, 500)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.directional_well())
+        layout.addWidget(self.inclined_page())
         self.setLayout(layout)
 
-    def directional_well(self):
+    def inclined_page(self):
         # Создаем контейнер и сетку для всего содержимого
         container = QWidget()
         grid = QGridLayout(container)
