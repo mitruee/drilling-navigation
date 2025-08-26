@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QLineEdit, QVBoxLayout, QGridLayout, QStackedWidget, QButtonGroup, QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout
 )
 from PyQt6.QtCore import Qt
-from core.gui import (
+from src.core.gui import (
     TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, 
     FourInterval, Tangential, Descending, Ascending, Undulant
 )
