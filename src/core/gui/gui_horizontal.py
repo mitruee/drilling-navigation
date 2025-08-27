@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import (
     QWidget, QLabel, QPushButton, QRadioButton, QFormLayout, QScrollArea,
-    QLineEdit, QVBoxLayout, QGridLayout, QStackedWidget, QButtonGroup, QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout
+    QLineEdit, QGridLayout, QStackedWidget, QButtonGroup, QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout
 )
 from PyQt6.QtCore import Qt
-from src.core.gui import (
+from src.gui import (
     TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, 
     FourInterval, Tangential, Descending, Ascending, Undulant
 )
@@ -386,7 +386,6 @@ class ResultDialog(QDialog):
         self._table_data = table_data
 
     def on_open_excel(self):
-        import numpy as np
         df = pd.DataFrame(self._table_data, columns=self.headers)
         if os.path.exists(self._excel_path):
             existing = pd.read_excel(self._excel_path)
