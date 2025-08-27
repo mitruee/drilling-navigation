@@ -109,6 +109,7 @@ class Tangential(HorizontalProfile):
     @property
     def L_h(self):
         return super().L_h
+
     
     @property
     def R_h(self):
@@ -358,3 +359,6 @@ class Undulant(HorizontalProfile):
     def intensities(self):
         return [
         ]
+
+well = Tangential(1200, 200, 80, 200)
+print(well.depths, well.lengths_of_the_bores, well.lengths_of_the_intervals, well.dislocations, well.angles, well.intensities)
