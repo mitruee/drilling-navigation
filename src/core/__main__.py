@@ -2,7 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QFont
 
-from src.core.gui.menu import Menu
+from src.gui.menu import Menu
 
 
 def main():

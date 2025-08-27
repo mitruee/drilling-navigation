@@ -1,21 +1,33 @@
 from PyQt6.QtWidgets import (
-    QWidget, QLabel, QPushButton, QRadioButton, QFormLayout, QScrollArea,
+    QWidget, QLabel, QPushButton, QRadioButton, QFormLayout, QScrollArea, QHBoxLayout,
     QLineEdit, QVBoxLayout, QGridLayout, QStackedWidget, QButtonGroup, QDialog, QTableWidget, QTableWidgetItem, QVBoxLayout
 )
 from PyQt6.QtCore import Qt
-from src.core.gui import (
-    TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, 
-    FourInterval, Tangential, Descending, Ascending, Undulant
+from src.gui import (
+    TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, FourInterval, 
+    Tangential, Descending, Ascending, Undulant,
+    DirectionalProfilesGraphic, HorizontalProfilesGraphic
 )
+from functools import partial
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 
-profile_dict = {
+direct_profile_dict = {
     0: TwoInterval,
     1: ThreeInterval,
     2: TangentialFourInterval,
     3: TangentialFiveInterval,
     4: FourInterval
+}
+
+horiz_profile_dict = {
+    0: Tangential,
+    1: Descending,
+    2: Ascending,
+    3: Undulant
 }
 
 class Horizontal_Well(QWidget):
@@ -157,8 +169,6 @@ class Horizontal_Well(QWidget):
         finish.clicked.connect(self.on_confirm_horizontal)
         grid.addWidget(finish, 13, 1, alignment=Qt.AlignmentFlag.AlignRight)
 
-
-
         # --- Оборачиваем все это в QScrollArea ---
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -188,12 +198,12 @@ class Horizontal_Well(QWidget):
     def on_confirm_horizontal(self):
         
         try:
-            idx_nav, vals_nav, idx_horz, vals_horz = self.read_params()
-            directional_profile = self.create_profile(idx_nav, vals_nav, profile_dict)
-            horizontal_profile = self.create_horizontal_profile(vals_nav, idx_horz, vals_horz)
+            idx_direct, vals_direct, idx_horz, vals_horz = self.read_params()
+            directional_profile = self.create_profile(idx_direct, vals_direct, direct_profile_dict)
+            horizontal_profile = self.create_profile(idx_horz, vals_direct[:3]+vals_horz, horiz_profile_dict)
             table_data = self.build_table_data(directional_profile, horizontal_profile)
 
-            dlg = ResultDialog(table_data, self)
+            dlg = ResultDialog(table_data, directional_profile, horizontal_profile, self)
             dlg.exec()
 
         except Exception as e:
@@ -243,48 +253,7 @@ class Horizontal_Well(QWidget):
         else:
             raise ValueError("Неверный тип профиля")
 
-    
-    def create_horizontal_profile(self, nav_vals, idx, vals):
-        """
-        Создаёт объект горизонтального профиля по индексу и списку параметров.
-        Для каждого типа ожидается 7 параметров:
-        ['H', 'A', 'a', 'S_l', 'T1', 'T2', 'R1']
 
-        Если передано меньше параметров, недостающие заполняются нулями.
-        Для параметров H, A, a берутся из активных параметров направляющей части.
-        """
-
-        # Безопасно достаем H, A, a (если есть)
-        H = nav_vals[0] if len(nav_vals) > 0 else 0
-        A = nav_vals[1] if len(nav_vals) > 1 else 0
-        a = nav_vals[2] if len(nav_vals) > 2 else 0
-
-        # Дополняем vals (от пользователя из горизонтальной части) недостающими параметрами
-        # vals обычно содержит только введенные параметры от GUI (могут быть 1-4), докомплектуем до 7
-        # Позиции: H, A, a, S_l, T1, T2, R1
-        # Для параметров, которые не вводят, подставляем 0 по умолчанию
-        S_l = vals[0] if len(vals) > 0 else 0
-        T1 = vals[1] if len(vals) > 1 else 0
-        T2 = vals[2] if len(vals) > 2 else 0
-        R1 = vals[3] if len(vals) > 3 else 0
-
-        full_vals = [H, A, a, S_l, T1, T2, R1]
-
-        if idx == 0:  # Tangential
-            profile = Tangential(*full_vals)
-        elif idx == 1:  # Descending
-            profile = Descending(*full_vals)
-        elif idx == 2:  # Ascending
-            profile = Ascending(*full_vals)
-        elif idx == 3:  # Undulant (волнообразный)
-            profile = Undulant(*full_vals)
-        else:
-            raise ValueError("Неверный тип горизонтального профиля")
-
-        return profile
-
-
-    
     def build_table_data(self, directional_profile, horizontal_profile):
         def format_float(val):
             try:
@@ -351,11 +320,13 @@ class Horizontal_Well(QWidget):
         return rows
 
 class ResultDialog(QDialog):
-    def __init__(self, table_data, parent=None):
+    def __init__(self, table_data, directional_profile, horizontal_profile, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Результаты расчёта профиля")
         self.resize(950, 220)
         layout = QVBoxLayout(self)
+
+        row = QHBoxLayout()
 
         self.table = QTableWidget(len(table_data), 7)
         self.headers = [
@@ -377,36 +348,84 @@ class ResultDialog(QDialog):
 
         self.table.resizeColumnsToContents()
         layout.addWidget(self.table)
-        btn_excel = QPushButton("Открыть файл с результатами")
+
+        btn_excel = QPushButton("Записать результаты в файл")
         btn_excel.clicked.connect(self.on_open_excel)
-        layout.addWidget(btn_excel, alignment=Qt.AlignmentFlag.AlignRight)
+
+        btn_graphics = QPushButton("Показать график")
+        btn_graphics.clicked.connect(partial(self.on_open_graphics, directional_profile, horizontal_profile))
+        row.addWidget(btn_graphics)
+        row.addWidget(btn_excel)
+
+        layout.addLayout(row)
         self.table.horizontalHeader().setDefaultSectionSize(120)     
         self.table.horizontalHeader().setStretchLastSection(True) 
         self._excel_path = "results.xlsx"
         self._table_data = table_data
 
     def on_open_excel(self):
-        import numpy as np
+        # Сначала записываем обычный DataFrame
         df = pd.DataFrame(self._table_data, columns=self.headers)
-        if os.path.exists(self._excel_path):
-            existing = pd.read_excel(self._excel_path)
-            start_row = len(existing) + 1
-            with pd.ExcelWriter(self._excel_path, engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
-                df.to_excel(writer, index=False, header=False, startrow=start_row)
-        else: 
-            with pd.ExcelWriter(self._excel_path, engine="openpyxl") as writer:
-                df.to_excel(writer, index=False)
-
         try:
-            from PyQt6.QtWidgets import QMessageBox
-            if os.name == 'nt':
-                os.startfile(self._excel_path)
-            elif sys.platform == 'darwin':
-                os.system(f'open "{self._excel_path}"')
+            ncols = len(self.headers)
+            if os.path.exists(self._excel_path):
+                start_row = pd.read_excel(self._excel_path).shape[0] + 2
+                with pd.ExcelWriter(self._excel_path, engine="openpyxl", mode="a", if_sheet_exists="overlay") as writer:
+                    df.to_excel(writer, index=False, header=False, startrow=start_row)
+                wb = openpyxl.load_workbook(self._excel_path)
+                ws = wb.active
             else:
-                os.system(f'xdg-open "{self._excel_path}"')
+                with pd.ExcelWriter(self._excel_path, engine="openpyxl") as writer:
+                    df.to_excel(writer, index=False)
+                wb = openpyxl.load_workbook(self._excel_path)
+                ws = wb.active
+                # --- СТИЛИ ДЛЯ ЗАГОЛОВКА ---
+                header_fill = PatternFill(fill_type="solid", fgColor="4A90E2")  # синий фон
+                header_font = Font(color="FFFFFF", bold=True)
+                thick_border = Border(bottom=Side(style="thick", color="000000"))
+                center = Alignment(horizontal="center", vertical="center")
+                # Стиль для всей строки заголовка
+                for col_num in range(1, ncols + 1):
+                    cell = ws.cell(row=1, column=col_num)
+                    cell.fill = header_fill
+                    cell.font = header_font
+                    cell.border = thick_border
+                    cell.alignment = center
+                    # Ширина столбца (на всю таблицу, можно индивидуально)
+                    col_letter = openpyxl.utils.get_column_letter(col_num)
+                    ws.column_dimensions[col_letter].width = 40
+            row = ws.max_row
+            for col_num in range(1, ncols + 1):
+                ws.cell(row=2, column=col_num).border = Border(top=Side(style="thick", color="000000"))
+                ws.cell(row=row, column=col_num).border = Border(top=Side(style="thick", color="FF9900"), bottom=Side(style="thick", color="000000"))
+            wb.save(self._excel_path)
         except Exception as e:
+            from PyQt6.QtWidgets import QMessageBox
             QMessageBox.warning(self, "Ошибка", f"Не удалось открыть файл:\n{e}")
+
+    
+
+
+    def on_open_graphics(self, dir_prof, horiz_prof):
+        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+        # создаём фигуру и оси
+        fig, axes = plt.subplots(figsize=(9, 6))
+
+        # рисуем профили
+        directional_profile = DirectionalProfilesGraphic(dir_prof, axes)
+        horizontal_profile = HorizontalProfilesGraphic(horiz_prof, axes)
+        directional_profile.draw()
+        horizontal_profile.draw()
+
+        # создаём канвас для PyQt6
+        plt.show()
+
+        
+
+
+
+
+        
 
 
 

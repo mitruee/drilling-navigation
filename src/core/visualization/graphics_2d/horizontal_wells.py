@@ -1,9 +1,7 @@
-from core.gui import (
-    TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, 
-    FourInterval, Tangential, Descending, Ascending, Undulant
-)
-import matplotlib.pyplot as plt
+from src.core.visualization.graphics_2d import TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, FourInterval, Tangential, Descending, Ascending, Undulant, DirectionalProfile, HorizontalProfile
 import numpy as np
+from abc import ABC, abstractmethod
+from math import *
 
 
 class ProfileGraphic(ABC):

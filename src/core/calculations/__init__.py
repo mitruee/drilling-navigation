@@ -1,1 +1,1 @@
-from .horizontal_wells import TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, FourInterval, Tangential, Descending, Ascending, Undulant
+from .horizontal_wells import TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, FourInterval, Tangential, Descending, Ascending, Undulant, HorizontalProfile, DirectionalProfile

@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QHBoxLayout
 from .gui_horizontal import Horizontal_Well
 from .gui_inclined import Inclined_Well
 import os
+from functools import partial
 
 class Menu(QWidget):
     def __init__(self):
@@ -29,17 +30,16 @@ class Menu(QWidget):
 
         button_inclined.clicked.connect(self.open_inclined)
         button_horiz.clicked.connect(self.open_horizontal)
-        button_horiz_res.clicked.connect(self.open_excel_horiz)
+        button_horiz_res.clicked.connect(partial(self.open_excel_horiz, "results.xlsx"))
         self._directional_win = None
         self._horizontal_win  = None
 
     def open_inclined(self):
         # сохраняем в атрибут, чтобы объект не был сборщиком уничтожен
-        self._directional_win = Directional_Well()
+        self._directional_win = Inclined_Well()
         self._directional_win.show()
 
-    def open_excel_horiz(self):
-        _excel_path = "results.xlsx"
+    def open_excel_horiz(self, _excel_path):
         try:
             from PyQt6.QtWidgets import QMessageBox
             if os.name == 'nt':

@@ -1,1 +1,0 @@
-from src.core.calculations import TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, FourInterval, Tangential, Descending, Ascending, Undulant
