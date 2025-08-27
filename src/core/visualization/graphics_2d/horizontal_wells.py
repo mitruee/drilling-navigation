@@ -1,7 +1,5 @@
-from core.gui import (
-    TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, 
-    FourInterval, Tangential, Descending, Ascending, Undulant
-)
+from src.core.calculations.horizontal_wells.directional_profiles import *
+from src.core.calculations.horizontal_wells.horizontal_profiles import *
 import matplotlib.pyplot as plt
 import numpy as np
 
