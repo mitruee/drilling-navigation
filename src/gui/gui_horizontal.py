@@ -288,7 +288,7 @@ class Horizontal_Well(QWidget):
         # --- Горизонтальный участок ---
 
         last_length = lengths[-1] if lengths else 0
-        L_h = hp.L_h if hp.L_h is not None else 0
+        L_h = hp.S_l if hp.S_l is not None else 0
 
         horiz_total_length = last_length + L_h
 
