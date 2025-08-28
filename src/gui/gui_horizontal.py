@@ -364,7 +364,6 @@ class ResultDialog(QDialog):
         self._table_data = table_data
 
     def on_open_excel(self):
-        # Сначала записываем обычный DataFrame
         df = pd.DataFrame(self._table_data, columns=self.headers)
         try:
             ncols = len(self.headers)

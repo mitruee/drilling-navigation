@@ -1,9 +1,4 @@
-
-from src.core.calculations.horizontal_wells.directional_profiles import *
-from src.core.calculations.horizontal_wells.horizontal_profiles import *
-
-
-from src.core.visualization.graphics_2d import TwoInterval, ThreeInterval, TangentialFourInterval, TangentialFiveInterval, FourInterval, Tangential, Descending, Ascending, Undulant, DirectionalProfile, HorizontalProfile
+from src.core.visualization.graphics_2d import *
 import numpy as np
 from abc import ABC, abstractmethod
 from math import *

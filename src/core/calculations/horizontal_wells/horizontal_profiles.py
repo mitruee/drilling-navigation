@@ -109,7 +109,6 @@ class Tangential(HorizontalProfile):
     @property
     def L_h(self):
         return super().L_h
-
     
     @property
     def R_h(self):
